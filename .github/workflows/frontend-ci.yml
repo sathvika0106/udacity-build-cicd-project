@@ -1,16 +1,18 @@
-name: Frontend CI
+name: Frontend Continuous Integration
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'starter/frontend/**'
+      - "starter/frontend/**"
+
   workflow_dispatch:
 
 jobs:
   lint:
     name: LINT JOB
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,21 +20,22 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
           cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: ./starter/frontend
         run: npm ci
 
-      - name: Run the npm run lint command
+      - name: Run lint
         working-directory: ./starter/frontend
         run: npm run lint
 
   test:
     name: TEST JOB
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,15 +43,15 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
           cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: ./starter/frontend
         run: npm ci
 
-      - name: Run the npm run test command
+      - name: Run tests
         working-directory: ./starter/frontend
         run: CI=true npm test
 
@@ -56,6 +59,7 @@ jobs:
     name: BUILD JOB
     needs: [lint, test]
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -63,16 +67,25 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
           cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: ./starter/frontend
         run: npm ci
 
-      - name: Build the application using docker
+      - name: Build frontend application
+        working-directory: ./starter/frontend
         env:
           REACT_APP_MOVIE_API_URL: http://localhost:5000
+        run: npm run build
+
+      - name: Build Docker image
         working-directory: ./starter/frontend
-        run: docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL --tag mp-frontend:latest .
+        env:
+          REACT_APP_MOVIE_API_URL: http://localhost:5000
+        run: |
+          docker build \
+            --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL \
+            --tag mp-frontend:latest .
