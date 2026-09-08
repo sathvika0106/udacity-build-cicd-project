@@ -16,8 +16,8 @@ RUN apk update && \
 
 RUN mkdir -p /var/www/app && mkdir /app
 
-COPY Pipfile* /app
-RUN cd /app && pipenv install --system --deploy
+ENV CFLAGS="-Wno-error=incompatible-pointer-types"
+RUN cd /app && pip install flask uwsgi==2.0.26 flask-cors
 
 COPY . /app
 
