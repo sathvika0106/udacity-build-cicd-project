@@ -4,8 +4,7 @@ on:
   pull_request:
     branches: ["main"]
     paths:
-      - "starter/frontend/**"
-
+      - 'starter/frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -20,15 +19,15 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
-          cache: "npm"
+          node-version: '16'
+          cache: 'npm'
           cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: ./starter/frontend
         run: npm ci
 
-      - name: Run lint
+      - name: Run the npm run lint command
         working-directory: ./starter/frontend
         run: npm run lint
 
@@ -43,19 +42,21 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
-          cache: "npm"
+          node-version: '16'
+          cache: 'npm'
           cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: ./starter/frontend
         run: npm ci
 
-      - name: Run tests
+      - name: Run the npm run test command
         working-directory: ./starter/frontend
-        run: CI=true npm test
+        env:
+          CI: true
+        run: npm run test
 
-    build:
+  build:
     name: BUILD JOB
     needs: [lint, test]
     runs-on: ubuntu-latest
@@ -77,7 +78,9 @@ jobs:
 
       - name: Run the npm run test command
         working-directory: ./starter/frontend
-        run: npm run test -- --watchAll=false
+        env:
+          CI: true
+        run: npm run test
 
       - name: Build the application using docker
         env:
